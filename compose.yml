@@ -1,0 +1,12 @@
+services:
+  fastapi:
+    container_name: fastapi-lambda
+    volumes:
+      - ./app:/app/
+    tty: true
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - 8080:8080
