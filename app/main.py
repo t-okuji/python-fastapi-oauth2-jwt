@@ -2,10 +2,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import jwt
+from argon2 import PasswordHasher, exceptions
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from settings import Settings
 
@@ -49,7 +49,11 @@ class UserInDB(User):
     hashed_password: str
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+ph = PasswordHasher(
+    time_cost=3,
+    memory_cost=2**16,
+    parallelism=4,
+)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -57,11 +61,22 @@ app = FastAPI()
 
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return ph.verify(hashed_password, plain_password)
+    except exceptions.VerifyMismatchError:
+        return False
+    except exceptions.InvalidHashError:
+        return False
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
+        )
 
 
 def get_password_hash(password):
-    return pwd_context.hash(password)
+    return ph.hash(password)
 
 
 def get_user(db, username: str):
