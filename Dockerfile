@@ -35,3 +35,11 @@ COPY ./app/. /app/
 WORKDIR /app
 ENTRYPOINT [ "fastapi" ]
 CMD [ "run", "main.py" ]
+
+# Debug
+FROM base AS debug
+COPY ./pyproject.toml ./poetry.lock ./
+RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN poetry install
+WORKDIR /app
+CMD [ "python3", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--reload" ]
