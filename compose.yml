@@ -1,6 +1,6 @@
 services:
   fastapi:
-    container_name: fastapi-lambda
+    container_name: rilapri-manage-api
     volumes:
       - ./app:/app/
     tty: true

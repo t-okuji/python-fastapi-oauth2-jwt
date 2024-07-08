@@ -11,16 +11,24 @@ RUN apt update && apt install curl -y
 # Development
 FROM base AS dev
 COPY ./pyproject.toml ./poetry.lock ./
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN curl -sSL https://install.python-poetry.org --insecure | python3 -
 RUN poetry install
 WORKDIR /app
 ENTRYPOINT [ "fastapi" ]
 CMD [ "dev", "main.py", "--host", "0.0.0.0", "--port", "8080" ]
 
+# Debug
+FROM base AS debug
+COPY ./pyproject.toml ./poetry.lock ./
+RUN curl -sSL https://install.python-poetry.org --insecure | python3 -
+RUN poetry install
+WORKDIR /app
+CMD [ "python3", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--reload" ]
+
 # Builder for prod
 FROM base AS builder
 COPY ./pyproject.toml ./poetry.lock ./
-RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.3
+RUN curl -sSL https://install.python-poetry.org --insecure | python3 - --version 1.8.3
 # Install only dependencies
 RUN poetry install --only main
 
@@ -35,11 +43,3 @@ COPY ./app/. /app/
 WORKDIR /app
 ENTRYPOINT [ "fastapi" ]
 CMD [ "run", "main.py" ]
-
-# Debug
-FROM base AS debug
-COPY ./pyproject.toml ./poetry.lock ./
-RUN curl -sSL https://install.python-poetry.org | python3 -
-RUN poetry install
-WORKDIR /app
-CMD [ "python3", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--reload" ]

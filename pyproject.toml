@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "python-fastapi-lambda-web-adapter"
+name = "rilapri-manage-api"
 version = "0.1.0"
 description = ""
 authors = ["t-okuji <t.okuji34@gmail.com>"]
@@ -32,13 +32,13 @@ select = [
     "W",  # pycodestyle warnings
     "F",  # pyflakes
     "I",  # isort
-    "UP",  # pyupgrade
+    "UP", # pyupgrade
 ]
 
 ignore = [
-    "D105",  # undocumented-magic-method
-    "D107",  # undocumented-pubic-init
-    "D405",  # indentation contains tabs
+    "D105", # undocumented-magic-method
+    "D107", # undocumented-pubic-init
+    "D405", # indentation contains tabs
 ]
 
 [tool.ruff.lint.per-file-ignores]
